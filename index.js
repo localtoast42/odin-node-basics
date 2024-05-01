@@ -1,35 +1,34 @@
-const { createServer } = require('node:http');
+const express = require('express');
+const app = express();
 const fs = require('fs');
 
 const hostname = 'localhost';
 const port = 8080;
 
-const server = createServer((req, res) => {
-    let filePath = '';
-    let responseCode = 200;
-
-    switch (req.url) {
-        case '/':
-            filePath = 'index.html';
-            break;
-        case '/about':
-            filePath = 'about.html';
-            break;
-        case '/contact-me':
-            filePath = 'contact-me.html';
-            break;
-        default:
-            filePath = '404.html';
-            responseCode = 404;
-    }
-
+function sendPage(filePath, res, responseCode) {
     fs.readFile(filePath, (err, data) => {
         res.writeHead(responseCode, {'Content-Type': 'text/html'});
         res.write(data);
         return res.end();
-    })
+    });
+};
+
+app.get('/', (req, res) => {
+    sendPage('index.html', res, 200);
 });
 
-server.listen(port, hostname, () => {
+app.get('/about', (req, res) => {
+    sendPage('about.html', res, 200);
+});
+
+app.get('/contact-me', (req, res) => {
+    sendPage('contact-me.html', res, 200);
+});
+
+app.use((req, res, next) => {
+    sendPage('404.html', res, 404);
+});
+
+app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
